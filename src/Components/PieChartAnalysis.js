@@ -9,7 +9,6 @@ export default class PieChartAnalysis extends React.Component {
     filter_length4: ""
   };
 
-  componentDidMount() {}
 
   render() {
     var filter_length2 = this.props.data.filter(item => {

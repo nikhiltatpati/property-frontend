@@ -15,7 +15,7 @@ class SearchBar extends React.Component {
 <div>
           <nav className="navbar navbar-dark bg-dark">
             <a className="navbar-brand" style={{ color: "white" }}>
-              Blacklight
+              Property Analyzer
             </a>
             <form class="form-inline" onSubmit={this.onSubmitCall}>
               <div class="input-group">
