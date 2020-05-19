@@ -5,9 +5,11 @@ import AvgBarAnalysis from "./AvgBarAnalysis";
 import ComBar from "./ComBar";
 import Dropdown from "./Dropdown";
 import home from "../assets/home.png";
+import LocBarAnalysis from "./LocBarAnalysis";
 
 import RangeSlider from "./RangeSlider";
 import Select from "react-select";
+import Gmap from "./Gmap";
 
 const options = [
   { value: "mumbai", label: "Mumbai" },
@@ -21,12 +23,13 @@ export default class App extends React.Component {
     super(props);
     this.currentValue = this.currentValue.bind(this);
     this.findProperty = this.findProperty.bind(this);
+    this.currentVal = this.currentVal.bind(this);
   }
 
   state = {
     selected_property_area: "",
     selected_property_bhk_array: "",
-    selected_property_area_list: "",
+    selected_property_area_list: [],
     property_list_bangalore: "",
     property_list_chennai: "",
     property_list_mumbai: "",
@@ -36,6 +39,7 @@ export default class App extends React.Component {
     location_array: [],
     value: 1,
     data_array: [],
+    val: 1,
   };
 
   final_bhk_array = [];
@@ -47,6 +51,10 @@ export default class App extends React.Component {
     this.setState({ data_array: cityDataValue });
   }
 
+  currentVal(data) {
+    this.setState({ val: data });
+  }
+
   onSubmitCall = (term) => {
     this.setState({
       selected_property_area: term,
@@ -56,21 +64,21 @@ export default class App extends React.Component {
 
   findingAvg(property_list) {
     var filter_length1 = property_list.filter((item) => {
-      return item.bedroom === "1 BHK";
+      return item.bedroom === "1 BHK" && item.total_price;
     }).length;
 
     var filter_length2 = property_list.filter((item) => {
-      return item.bedroom === "2 BHK";
+      return item.bedroom === "2 BHK" && item.total_price;
     }).length;
 
     var filter_length3 = property_list.filter((item) => {
-      return item.bedroom === "3 BHK";
+      return item.bedroom === "3 BHK" && item.total_price;
     }).length;
 
     var avg1 =
       property_list
         .filter((item) => {
-          return item.bedroom === "1 BHK";
+          return item.bedroom === "1 BHK" && item.total_price;
         })
         .reduce((acc, val) => {
           return acc + parseInt(val.total_price);
@@ -79,7 +87,7 @@ export default class App extends React.Component {
     var avg2 =
       property_list
         .filter((item) => {
-          return item.bedroom === "2 BHK";
+          return item.bedroom === "2 BHK" && item.total_price;
         })
         .reduce((acc, val) => {
           return acc + parseInt(val.total_price);
@@ -88,7 +96,7 @@ export default class App extends React.Component {
     var avg3 =
       property_list
         .filter((item) => {
-          return item.bedroom === "3 BHK";
+          return item.bedroom === "3 BHK" && item.total_price;
         })
         .reduce((acc, val) => {
           return acc + parseInt(val.total_price);
@@ -118,7 +126,7 @@ export default class App extends React.Component {
   }
 
   async fetchingData(location) {
-    const url = "http://127.0.0.1:5000/api?location=" + location;
+    const url = "http://127.0.0.1:5000/api/multiple?location=" + location;
     const res1 = await fetch(url);
     const property_list = await res1.json();
     var avg_array = this.findingAvg(property_list);
@@ -143,8 +151,8 @@ export default class App extends React.Component {
 
   async findProperty(location) {
     try {
-      const url = "http://127.0.0.1:5000/api?location=" + location;
-      const res1 = await fetch(url); 
+      const url = "http://127.0.0.1:5000/api/multiple?location=" + location;
+      const res1 = await fetch(url);
       const selected_property_area_list = await res1.json();
       const avg_array = this.findingAvg(selected_property_area_list);
       this.setState({ bhk_array: [avg_array] });
@@ -156,27 +164,31 @@ export default class App extends React.Component {
       this.setState({
         selected_property_area_list,
       });
-      const res2 = await fetch("http://127.0.0.1:5000/api?location=bangalore"); 
+      const res2 = await fetch(
+        "http://127.0.0.1:5000/api/multiple?location=bangalore"
+      );
       const property_list_bangalore = await res2.json();
-      console.log(property_list_bangalore);
       this.setState({
         property_list_bangalore,
       });
-      const res3 = await fetch("http://127.0.0.1:5000/api?location=mumbai"); 
+      const res3 = await fetch(
+        "http://127.0.0.1:5000/api/multiple?location=mumbai"
+      );
       const property_list_mumbai = await res3.json();
-      console.log(property_list_mumbai);
       this.setState({
         property_list_mumbai,
       });
-      const res4 = await fetch("http://127.0.0.1:5000/api?location=chennai"); 
+      const res4 = await fetch(
+        "http://127.0.0.1:5000/api/multiple?location=chennai"
+      );
       const property_list_chennai = await res4.json();
-      console.log(property_list_chennai);
       this.setState({
         property_list_chennai,
       });
-      const res5 = await fetch("http://127.0.0.1:5000/api?location=kolkata"); 
+      const res5 = await fetch(
+        "http://127.0.0.1:5000/api/multiple?location=kolkata"
+      );
       const property_list_kolkata = await res5.json();
-      console.log(property_list_kolkata);
       this.setState({
         property_list_kolkata,
       });
@@ -200,6 +212,27 @@ export default class App extends React.Component {
 
   render() {
     const { selectedOption } = this.state;
+
+    var filter_length0 = this.state.selected_property_area_list.length;
+
+    var filter_length1 = this.state.selected_property_area_list.filter(
+      (item) => {
+        return item.bedroom === "1 BHK";
+      }
+    ).length;
+
+    var filter_length2 = this.state.selected_property_area_list.filter(
+      (item) => {
+        return item.bedroom === "2 BHK";
+      }
+    ).length;
+
+    var filter_length3 = this.state.selected_property_area_list.filter(
+      (item) => {
+        return item.bedroom === "3 BHK";
+      }
+    ).length;
+
     return (
       <div>
         <SearchBar onChange={this.onSubmitCall} />
@@ -217,16 +250,58 @@ export default class App extends React.Component {
             />
           </div>
         ) : (
-          <div
-            style={{ height: "100vh", width: "100vw"}}
-          >
-            <div>
+          <div style={{ background: "#38c172" }}>
+            <div className="card">
               <PieChartAnalysis data={this.state.selected_property_area_list} />
             </div>
-            <div>
+            <div className="card" style={{ width: 375 }}>
+              <div style={{ textAlign: "center" }}>
+                <b>Total Houses Fetched</b>
+              </div>
+              <div style={{ textAlign: "center", marginBottom: "10px" }}>
+                {filter_length0}
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <b>Total 1 BHK fetched</b>
+              </div>
+              <div style={{ textAlign: "center", marginBottom: "10px" }}>
+                {filter_length1}
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <b>Total 2 BHK fetched</b>
+              </div>
+              <div style={{ textAlign: "center", marginBottom: "10px" }}>
+                {filter_length2}
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <b>Total 3 BHK fetched</b>
+              </div>
+              <div style={{ textAlign: "center", marginBottom: "10px" }}>
+                {filter_length3}
+              </div>
+            </div>
+            <div className="card" style={{ float: "right" }}>
               <AvgBarAnalysis data={this.state.selected_property_area_list} />
             </div>
-            <div>
+
+            <div className="card">
+              <ComBar
+                bhk={this.state.data_array}
+                city={this.state.location_array}
+              />
+              <div
+                style={{
+                  display: "inline-block",
+                  marginLeft: "27%",
+                }}
+              >
+                <span>
+                  <RangeSlider currentValue={this.currentValue} />
+                </span>
+                <span
+                  style={{ marginLeft: "40%" }}
+                >{`${this.state.value} BHK`}</span>
+              </div>
               <Select
                 closeMenuOnSelect={false}
                 value={selectedOption}
@@ -235,17 +310,28 @@ export default class App extends React.Component {
                 isMulti
               />
             </div>
-            <div>
-              <span>
-                <RangeSlider currentValue={this.currentValue} />
-              </span>
-              {this.state.value}
-            </div>
-            <div>
-              <ComBar
-                bhk={this.state.data_array}
-                city={this.state.location_array}
+            <div className="card" style={{ float: "right" }}>
+              <LocBarAnalysis
+                data={this.state.selected_property_area_list}
+                range={this.state.val}
               />
+              <div
+                style={{
+                  display: "inline-block",
+                  marginLeft: "27%",
+                }}
+              >
+                <span>
+                  <RangeSlider currentValue={this.currentVal} />
+                </span>
+                <span
+                  style={{ marginLeft: "40%" }}
+                >{`${this.state.val} BHK`}</span>
+              </div>
+            </div>
+
+            <div>
+              <Gmap data={this.state.selected_property_area_list} />
             </div>
           </div>
         )}
